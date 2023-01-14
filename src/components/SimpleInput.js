@@ -1,39 +1,39 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import useInput from "../hooks/use-input";
 
 const SimpleInput = (props) => {
-  const nameInputRef = useRef();
-  const [enteredName, setEnteredName]=useState('');
-  const [enteredNameIsTouched, setEnteredNameIsTouched] = useState(false)
-  const enteredNameIsValid = enteredName.trim() !==''
-  const nameInputIsInValid = !enteredNameIsValid && enteredNameIsTouched
-  const enteredNameHandler=(event)=>{
-    setEnteredName(event.target.value)
-  }
-  const nameInputBlurHandler= event=>{
-    setEnteredNameIsTouched(true);
+  const {
+    value: enteredName,
+    isValid: enteredNameIsValid,
+    valueChangeHandler: enteredNameHandler,
+    inputBlurHandler: nameInputBlurHandler,
+    hasError:nameInputError,reset
+  } = useInput((value)=>{if(value==undefined){value=''}
+                      return value.trim() !==''});
+ let formIsValid=false
+  if(enteredNameIsValid){
+    formIsValid=true
   }
   const submitHandler = (event)=>{
     event.preventDefault();
-    setEnteredNameIsTouched(true)
     if(!enteredNameIsValid){
       return;
     }
-    setEnteredName('');
-    setEnteredNameIsTouched(false)
+    reset()
   }
 
 
-  const nameInputClasses = nameInputIsInValid?"form-control invalid":"form-control"
-  console.log("nameInputIsInValid",nameInputIsInValid);
+  const nameInputClasses = nameInputError?"form-control invalid":"form-control"
+  // console.log("nameInputIsInValid",nameInputIsInValid);
   return (
     <form onSubmit={submitHandler}>
       <div className={nameInputClasses}>
         <label htmlFor='name'>Your Name</label>
-        <input ref={nameInputRef} type='text' id='name' onChange= {enteredNameHandler} value={enteredName} onBlur={nameInputBlurHandler}/>
+        <input  type='text' id='name' onChange= {enteredNameHandler} value={enteredName} onBlur={nameInputBlurHandler}/>
       </div>
-      {nameInputIsInValid && <p>Entered valid name</p>}
+      {nameInputError && <p>Entered valid name</p>}
       <div className="form-actions">
-        <button >Submit</button>
+        <button disabled={!formIsValid}>Submit</button>
       </div>
     </form>
   );
